@@ -71,6 +71,7 @@ ROMSORT_DATS=dats/metadat ./romsort build --config my.lua</code></pre>
 ./romsort start build --config my.lua
 ./romsort status                       # step, progress, ETA, result
 ./romsort ui                           # the same, live, in Neovim</code></pre>
+  <p>Live in Neovim already? The checkout is a plugin too. Add it to <code>runtimepath</code> and <code>:Romsort</code> opens the dashboard in its own tab of your session, with <code>:Romsort build</code>, <code>:Romsort status</code> and the rest tab-completed.</p>
   <p>Every hash is saved the moment it is computed, and every change to the library is atomic. An interrupted run therefore picks up where it stopped, and nothing that finished is redone.</p>
 
   <div class="table-scroll"><table>
