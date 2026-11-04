@@ -69,7 +69,8 @@ ROMSORT_DATS=dats/metadat ./romsort build --config my.lua</code></pre>
   <p><code>plan</code> is a dry run. It hashes, matches and writes a report, and puts nothing in the library. For a terabyte, start it detached and check back:</p>
 <pre><code>./romsort autostart on                 # once: resume after any reboot
 ./romsort start build --config my.lua
-./romsort status                       # step, progress, ETA, result</code></pre>
+./romsort status                       # step, progress, ETA, result
+./romsort ui                           # the same, live, in Neovim</code></pre>
   <p>Every hash is saved the moment it is computed, and every change to the library is atomic. An interrupted run therefore picks up where it stopped, and nothing that finished is redone.</p>
 
   <div class="table-scroll"><table>
@@ -81,6 +82,7 @@ ROMSORT_DATS=dats/metadat ./romsort build --config my.lua</code></pre>
       <tr><td><code>start</code></td><td>Run <code>plan</code> or <code>build</code> detached at low priority. It survives logout, and with autostart it survives reboots.</td></tr>
       <tr><td><code>status</code></td><td>Running, interrupted or idle; the current step, its progress and ETA; the report summary.</td></tr>
       <tr><td><code>autostart on</code></td><td>Add a cron entry that resumes an interrupted run within 10 minutes, for example after a reboot.</td></tr>
+      <tr><td><code>ui</code></td><td>Live dashboard in Neovim: windows for the run (step, progress bar, ETA), totals, the check and the log. Close it any time; the run carries on.</td></tr>
       <tr><td><code>stop</code></td><td>Stop the detached run and forget it.</td></tr>
     </tbody>
   </table></div>
