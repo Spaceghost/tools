@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>romsort · spacegho.st tools</title>
+<meta name="description" content="romsort sorts a ROM collection into a verified LaunchBox library built from hardlinks. Every LaunchBox path that worked still works, and no original file is ever touched.">
+<link rel="canonical" href="https://spacegho.st/tools/romsort/">
+<meta property="og:type" content="article">
+<meta property="og:title" content="romsort: a sorted LaunchBox library that never breaks">
+<meta property="og:description" content="DAT-verified names, deduplicated, built from hardlinks. Every LaunchBox path that worked still works.">
+<meta property="og:url" content="https://spacegho.st/tools/romsort/">
+<link rel="stylesheet" href="/tools/tools.css">
+</head>
+<body>
+<header class="site"><div class="wrap">
+  <a class="home" href="/tools/">spacegho.st / tools</a>
+  <nav><a href="/tools/">Tools</a><a href="/mods/ffxiv/">FFXIV mods</a><a href="https://github.com/Spaceghost/romsort">GitHub</a></nav>
+</div></header>
+<main><div class="wrap">
+  <h1>romsort</h1>
+  <p class="lede">A sorted, verified LaunchBox library built from your existing ROM collection. No original file is ever moved or rewritten, and every LaunchBox path that worked still works.</p>
+  <ul class="tags"><li>Lua 5.1+ / LuaJIT</li><li>bash</li><li>No-Intro</li><li>Redump</li><li>LaunchBox</li><li>MIT</li></ul>
+  <a class="cta" href="https://github.com/Spaceghost/romsort">Get it on GitHub</a><a class="cta secondary" href="#run-it">Run it</a>
+
+  <h2>Why it exists</h2>
+  <p>My games were spread over a LaunchBox install, a second drive full of PlayStation and PSP discs, and the dumps of three handheld SD cards: about a terabyte, with the same games in four places under four names. Every ROM manager I tried wanted to <em>move</em> or <em>rename</em> files. LaunchBox stores the exact path of every game, so that breaks it: a renamed file is a dead entry, and with ten thousand games you find out one at a time.</p>
+  <p>romsort leaves your collection alone and builds a second, sorted LaunchBox next to it.</p>
+
+  <h2>What you get</h2>
+<pre><code>sorted/LaunchBox/
+  Games/Nintendo Game Boy Advance/Golden Sun (USA, Europe).gba
+  Games/Super Nintendo Entertainment System/Chrono Trigger (USA).sfc
+  Games/Nintendo Game Boy/Unverified/my hack.gb
+  Games/Arcade/sf2.zip
+  Data/  Images/  Emulators/  ...   your install, mirrored</code></pre>
+  <ul class="promise">
+    <li><strong>Verified names.</strong> Every file is hashed with SHA-1, or CRC for files inside zips, with NES, Lynx, Atari 7800 and SNES copier headers stripped. It is then matched against No-Intro and Redump. Matches get their canonical name; card ROMs no database knows go to <code>Unverified/</code>.</li>
+    <li><strong>No extra disk.</strong> The library is hardlinks into your sources. Deleting it frees nothing because it costs nothing, and you lose nothing.</li>
+    <li><strong>One copy of each game.</strong> Identical files from different drives and cards fold into one entry. The LaunchBox copy wins its name.</li>
+    <li><strong>LaunchBox keeps working.</strong> Every path in LaunchBox's XML is resolved and rewritten to the file's new home. That includes <code>J:\</code> and <code>P:\</code> drive paths and Windows names in the wrong case. Only the path text changes; every other byte of the XML is identical. Box art matches on titles, which never change.</li>
+    <li><strong>Safe to re-run.</strong> Hashes are cached, so a rebuild only reads new files. A rebuild never overwrites anything you changed inside the sorted library.</li>
+  </ul>
+
+  <h2>The check that makes it safe</h2>
+  <p>After every build, <code>romsort check</code> re-reads LaunchBox's XML from the original and from the sorted library, then compares them path by path. It fails the run if any of these is true:</p>
+  <ul>
+    <li>a path that resolved in your original no longer resolves;</li>
+    <li>a path now points at different content;</li>
+    <li>either XML file differs anywhere outside a path value;</li>
+    <li>the original install changed while the run was reading it.</li>
+  </ul>
+  <p>Some paths were already broken before romsort ran, like games on a drive that no longer exists. Those are left exactly as they were and listed in a report, so you can see what was missing all along.</p>
+
+  <h3>What it never renames</h3>
+  <ul>
+    <li><strong>Arcade sets</strong> (MAME, FBNeo, Neo Geo, CPS, Naomi), because emulators find a set by its zip name.</li>
+    <li><strong>Multi-file discs</strong>: anything sharing a folder with a <code>.cue</code>, <code>.gdi</code>, <code>.m3u</code> or <code>.ccd</code>, so cue sheets keep finding their tracks.</li>
+    <li><strong>Per-game folders</strong> inside a LaunchBox platform folder, and port or OpenBOR trees.</li>
+  </ul>
+
+  <h2 id="run-it">Run it</h2>
+  <p>You need <code>bash</code>, coreutils, findutils, <code>unzip</code> and Lua 5.1 or newer (LuaJIT is fastest). <code>7z</code> is optional; with it, <code>.7z</code> and <code>.rar</code> archives are matched too.</p>
+<pre><code>git clone https://github.com/Spaceghost/romsort &amp;&amp; cd romsort
+git clone --depth 1 https://github.com/libretro/libretro-database dats
+cp config.lua my.lua                         # point it at your drives
+ROMSORT_DATS=dats/metadat ./romsort plan  --config my.lua
+ROMSORT_DATS=dats/metadat ./romsort build --config my.lua</code></pre>
+  <p><code>plan</code> is a dry run. It hashes, matches and writes a report, and puts nothing in the library. For a terabyte, start it detached and check back:</p>
+<pre><code>./romsort start build --config my.lua
+./romsort log         # follow it
+./romsort status      # the report and the check result</code></pre>
+
+  <div class="table-scroll"><table>
+    <thead><tr><th>Command</th><th>Does</th></tr></thead>
+    <tbody>
+      <tr><td><code>plan</code></td><td>Scan, hash, match; write <code>plan.tsv</code> and <code>report.txt</code>. No library writes.</td></tr>
+      <tr><td><code>build</code></td><td>Plan, then create or update the library, then check it.</td></tr>
+      <tr><td><code>check</code></td><td>Verify the library against the original LaunchBox install.</td></tr>
+      <tr><td><code>status</code></td><td>Print the last report and check result.</td></tr>
+      <tr><td><code>start</code></td><td>Run <code>plan</code> or <code>build</code> detached at low priority.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2>Configuration</h2>
+  <p>The config is one Lua file. It lists your sources in precedence order, either LaunchBox-shaped <code>&lt;Platform&gt;/</code> trees or card folders like <code>GBA</code>, <code>FC</code> or <code>megadrive</code>. It also says what each Windows drive letter maps to, and gives the platform table: LaunchBox names, folder aliases and DAT files. The sorted library must be on the same filesystem as the sources, because hardlinks can't cross filesystems.</p>
+
+  <p>romsort only organises files you already own. It downloads nothing but the public hash databases you point it at.</p>
+</div></main>
+<footer class="site"><div class="wrap">
+  <a href="/tools/">All tools</a> · Source: <a href="https://github.com/Spaceghost/romsort">Spaceghost/romsort</a> · Made by <a href="https://github.com/Spaceghost">Johnneylee Jack Rollins</a>.
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,17 @@
+name = "spaceghost-tools"
+compatibility_date = "2026-09-01"
+
+# Static pages only: no Worker script runs, every request is served from public/.
+workers_dev = false
+preview_urls = false
+
+# Exactly the /tools paths on spacegho.st; every other route on the zone is untouched.
+routes = [
+  { pattern = "spacegho.st/tools", zone_name = "spacegho.st" },
+  { pattern = "spacegho.st/tools/*", zone_name = "spacegho.st" },
+]
+
+[assets]
+directory = "public"
+html_handling = "auto-trailing-slash"
+not_found_handling = "404-page"
