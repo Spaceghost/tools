@@ -35,7 +35,7 @@
   Games/Arcade/sf2.zip
   Data/  Images/  Emulators/  ...   your install, mirrored</code></pre>
   <ul class="promise">
-    <li><strong>Verified names.</strong> Every file is hashed with SHA-1, or CRC for files inside zips, with NES, Lynx, Atari 7800 and SNES copier headers stripped. It is then matched against No-Intro and Redump. Matches get their canonical name; card ROMs no database knows go to <code>Unverified/</code>.</li>
+    <li><strong>Verified names.</strong> Every file is hashed with SHA-1, or CRC for files inside zips, with NES, Lynx, Atari 7800 and SNES copier headers stripped and trimmed GBA dumps padded back to full size. It is then matched against No-Intro and Redump. Matches get their canonical name; card ROMs no database knows go to <code>Unverified/</code>.</li>
     <li><strong>No extra disk.</strong> The library is hardlinks into your sources. Deleting it frees nothing because it costs nothing, and you lose nothing.</li>
     <li><strong>One copy of each game.</strong> Identical files from different drives and cards fold into one entry. The LaunchBox copy wins its name.</li>
     <li><strong>LaunchBox keeps working.</strong> Every path in LaunchBox's XML is resolved and rewritten to the file's new home. That includes <code>J:\</code> and <code>P:\</code> drive paths and Windows names in the wrong case. Only the path text changes; every other byte of the XML is identical. Box art matches on titles, which never change.</li>
@@ -50,7 +50,7 @@
     <li>either XML file differs anywhere outside a path value;</li>
     <li>the original install changed while the run was reading it.</li>
   </ul>
-  <p>Some paths were already broken before romsort ran, like games on a drive that no longer exists. Those are left exactly as they were and listed in a report, so you can see what was missing all along.</p>
+  <p>Some paths were already broken before romsort ran. Often the game is still there: a scene release was moved into its own folder, or a ROM pack was extracted and renamed. When exactly one file under the same platform has the same file name, or the same title once pack numbers and punctuation are ignored, romsort points the game at it and <code>check</code> proves the new path works. Everything else is left exactly as it was and listed in a report, so you can see what was missing all along. The original XML is never touched.</p>
 
   <h3>What it never renames</h3>
   <ul>
@@ -60,7 +60,7 @@
   </ul>
 
   <h2 id="run-it">Run it</h2>
-  <p>You need <code>bash</code>, coreutils, findutils, <code>unzip</code> and Lua 5.1 or newer (LuaJIT is fastest). <code>7z</code> is optional; with it, <code>.7z</code> and <code>.rar</code> archives are matched too.</p>
+  <p>You need <code>bash</code>, coreutils, findutils, <code>unzip</code> and Lua 5.1 or newer (LuaJIT is fastest). <code>7z</code> is optional; with it, <code>.7z</code> and <code>.rar</code> archives are matched too. It can live in a container: the config can name a command such as <code>incus exec mybox -- 7z</code>.</p>
 <pre><code>git clone https://github.com/Spaceghost/romsort &amp;&amp; cd romsort
 git clone --depth 1 https://github.com/libretro/libretro-database dats
 cp config.lua my.lua                         # point it at your drives
